@@ -1,0 +1,47 @@
+g++ -o http HttpServer.cc -std=c++11 -lpthread
+In file included from HttpServer.hpp:4:0,
+                 from HttpServer.cc:1:
+Protocol.hpp: In member function ‘int EndPoint::RecvLine(std::string&)’:
+Protocol.hpp:99:32: error: invalid conversion from ‘char’ to ‘void*’ [-fpermissive]
+     ssize_t s = recv(sock,c,1,0); // \n  \r  \r\n
+                                ^
+In file included from /usr/include/netinet/in.h:24:0,
+                 from /usr/include/arpa/inet.h:22,
+                 from Protocol.hpp:10,
+                 from HttpServer.hpp:4,
+                 from HttpServer.cc:1:
+/usr/include/sys/socket.h:157:16: error:   initializing argument 2 of ‘ssize_t recv(int, void*, size_t, int)’ [-fpermissive]
+ extern ssize_t recv (int __fd, void *__buf, size_t __n, int __flags);
+                ^
+In file included from HttpServer.hpp:4:0,
+                 from HttpServer.cc:1:
+Protocol.hpp:104:32: error: invalid conversion from ‘char’ to ‘void*’ [-fpermissive]
+       if(recv(sock,c,1,MSG_PEEK) > 0)//（窥探）MSG_PEEK相当于探针，可以探测出下一个内容
+                                ^
+In file included from /usr/include/netinet/in.h:24:0,
+                 from /usr/include/arpa/inet.h:22,
+                 from Protocol.hpp:10,
+                 from HttpServer.hpp:4,
+                 from HttpServer.cc:1:
+/usr/include/sys/socket.h:157:16: error:   initializing argument 2 of ‘ssize_t recv(int, void*, size_t, int)’ [-fpermissive]
+ extern ssize_t recv (int __fd, void *__buf, size_t __n, int __flags);
+                ^
+In file included from HttpServer.hpp:4:0,
+                 from HttpServer.cc:1:
+Protocol.hpp:107:24: error: invalid conversion from ‘char’ to ‘void*’ [-fpermissive]
+         recv(sock,c,1,0);
+                        ^
+In file included from /usr/include/netinet/in.h:24:0,
+                 from /usr/include/arpa/inet.h:22,
+                 from Protocol.hpp:10,
+                 from HttpServer.hpp:4,
+                 from HttpServer.cc:1:
+/usr/include/sys/socket.h:157:16: error:   initializing argument 2 of ‘ssize_t recv(int, void*, size_t, int)’ [-fpermissive]
+ extern ssize_t recv (int __fd, void *__buf, size_t __n, int __flags);
+                ^
+In file included from HttpServer.cc:1:0:
+HttpServer.hpp: In member function ‘void HttpServer::Start()’:
+HttpServer.hpp:88:18: error: base operand of ‘->’ has non-pointer type ‘Sock’
+     n_sock = sock->Accept();
+                  ^
+make: *** [http] Error 1

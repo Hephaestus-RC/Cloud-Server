@@ -30,7 +30,7 @@ class Sock
 		{
 			struct sockaddr_in local;
 			local.sin_family = AF_INET;
-			local.sin_add.s_addr = htonl(INADDR_ANY);
+			local.sin_addr.s_addr = htonl(INADDR_ANY);
 			local.sin_port = htons(port);
 
 			if(bind(sock,(struct sockaddr*)&local,sizeof(local))<0)
@@ -65,18 +65,18 @@ class Sock
 			if(sock >= 0)
 				close(sock);
 		}
-}
+};
 
 class HttpServer
 {
 	private:
 		Sock sock;
 	public:
-		HttpServer(int _port = DEFAULT_SOCK):sock(_port)
+		HttpServer(int _port = DEFAULT_PORT):sock(_port)
 		{}
 		void InitHttpServer()
 		{
-			sock.Sokcet();
+			sock.Socket();
 			sock.Bind();
 			sock.Listen();
 		}
@@ -85,7 +85,7 @@ class HttpServer
 			int n_sock;
 			for(;;)
 			{
-				n_sock = sock->Accept();
+				n_sock = sock.Accept();
 				if(n_sock >= 0)
 				{
 					int* so = new int(n_sock);

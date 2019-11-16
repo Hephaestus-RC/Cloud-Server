@@ -5,12 +5,14 @@
 #include<unistd.h>
 #include<stdlib.h>
 #include<string>
+#include<unordered_map>
 #include<sstream>
 #include<arpa/inet.h>
 #include<netinet/in.h>
 #include<sys/types.h>
 #include<sys/socket.h>
 #include<pthread.h>
+#include"Util.hpp"
 
 using namespace std;
 
@@ -25,6 +27,7 @@ class HttpRequest
 		string method;
 		string uri;
 		string version;
+		unordered_map<string,string> um;
 	public:
 		HttpRequest()
 		{}
@@ -36,25 +39,41 @@ class HttpRequest
 		{
 			return request_header;
 		}
-		string& GetRequestBlank()	//设置空行
-		{
-			return  request_blank;
-		}
 		string& GetRequestBody()	//设置请求正文
 		{
 			return request_body;
 		}		
-		bool MethodIsLegal()
+		bool MethodIsLegal()	//判断请求方法是否合法
 		{
-
+			if(method!="POST" && method!="GET")
+				return false;
+			return true;
 		}
 		void RequestLineParse()		//解析请求行
 		{
 			stringstream ss(request_line);
 			ss>>method>>uri>>version;//自动分离
+			//将方法转换为大写
+			Util::StringToUpper(method);
+			cout<<"method: "<<method<<endl;
+			cout<<"uri: "<<uri<<endl;
+			cout<<"verion: "<<version<<endl;
 		}
 		//解析请求报头
-		//解析请求正文
+		void RequestHeaderParse()
+		{
+
+		}
+		//获取请求正文长度
+		int GetContentLength()
+		{
+
+		}
+		//判断是否需要读取请求正文
+		bool IsNeedRecv()
+		{
+
+		}
 		~HttpRequest()
 		{}
 };
@@ -81,23 +100,22 @@ class EndPoint
 	public:
 		EndPoint(int _sock):sock(_sock)
 		{}
-		//读一行
-		int RecvLine(string& line) //将所有不同格式的行分隔符都转换成'\n'
+		int RecvLine(string& line)//读一行,并且将所有不同格式的行分隔符都转换成'\n'
 		{
 			char c = 'X';
 			while(c!='\n')
 			{
-				ssize_t s = recv(sock,c,1,0); // \n  \r  \r\n
+				ssize_t s = recv(sock,&c,1,0); // \n  \r  \r\n
 				if(s > 0)
 				{
 					if(c=='\r') //行分隔符有可能是\r or \r\n
 					{
-						if(recv(sock,c,1,MSG_PEEK) > 0)//MSG_PEEK相当于探针，可以探测出下一个内容
+						if(recv(sock,&c,1,MSG_PEEK) > 0)//（窥探）MSG_PEEK相当于探针，可以探测出下一个内容
 						{
 							if(c=='\n') //确定行分隔符是\r\n
-								recv(sock,c,1,0);
+								recv(sock,&c,1,0);
 							else		//确定行分隔符是\r
-								c = '\n'；
+								c = '\n';
 						}
 						else
 							c = '\n'; //防止因缓冲区无数据recv，而导致c中保存随机值；
@@ -112,38 +130,56 @@ class EndPoint
 			}
 			return line.size();
 		}
-		void RecvRequestLine(HttpRequest* rq)
+		void RecvRequestLine(HttpRequest* rq)//接收请求行
 		{
-			RecvLine(rq->GetRequestLine());		//接收请求行
-			RecvHeader(rq->GetRequestHeader()); //接收请求报头
-			RecvBlank(rq->GetRequestBlank());	//接收空行
-			RecvBody(rq->GetRequestBody());		//接收请求正文
+			RecvLine(rq->GetRequestLine());		
+		}
+		void RecvRequestHeader(HttpRequest* rq)//接收请求报头
+		{
+			string temp;
+			string header = rq->GetRequestHeader();
+			while(1)
+			{
+				RecvLine(temp);
+				if(temp=="\n")
+					break;
+				header+=temp;
+				temp.clear();
+			}
+			cout<<header<<endl;
 		}
 		~EndPoint()
-		{}
+		{
+			if(sock>0)
+				close(sock);
+		}
 };
 
+//1.构建request，接收请求，
+//2.解析request
+//3.构建response
+//4.
 class Entry
 {
 	public:
 		static void* HandlRequest(void* args)
 		{
-			int sock = *(int*)args;
+			int *p = (int*)args;
+			int sock = *p;
 			EndPoint* ep = new EndPoint(sock);
 			HttpRequest* rq = new HttpRequest();
 			HttpResponse* rsp = new HttpResponse();
 			
-			ep->RecvRequestLine(rq);	//?	接收请求报文
+			ep->RecvRequestLine(rq);	//接收请求行
 			rq->RequestLineParse();		//解析请求行
 			
-			if(MethodIsLegal())		//判定请求方法是否合法
-			{//........
-			}
+			if(!rq->MethodIsLegal())		//判定请求方法是否合法
+				goto end;
+
+			ep->RecvRequestHeader(rq); //接收请求报头			
 			
-			
-			
-			
-			delete args;
+end:
+			delete p;
 			delete ep;
 			delete rq;
 			delete rsp;

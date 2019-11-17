@@ -7,6 +7,7 @@
 #include<string>
 #include<algorithm>
 #include<sstream>
+#include<vector>
 
 class Util
 {
@@ -27,10 +28,21 @@ class Util
 		//将字符串中的子串打散，然后保存在vector中
 		static void TransfromVector(std::string& s,std::vector<std::string>& v)
 		{
+			int start = 0;
+			auto pos = s.find('\n');
+			while(pos!=std::string::npos)
+			{
+				v.push_back(s.substr(start,pos-start));
+				start = pos+1;
+				pos = s.find('\n',start);
+			}
 		}
 		//将一个字符串按“: ”构成key和value
-		static void MakeKV(std::string& k,std::string& v)
+		static void MakeKV(std::string& s,std::string& k,std::string& v)
 		{
+			auto pos = s.find(": ");
+			k = s.substr(0,pos);
+			v = s.substr(pos+2);
 		}
 };
 

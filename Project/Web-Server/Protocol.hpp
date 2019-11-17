@@ -62,17 +62,29 @@ class HttpRequest
 		//解析请求报头
 		void RequestHeaderParse()
 		{
-
+			std::vector<std::string> v;
+			Util::TransfromVector(request_header,v);
+			string key,value;
+			for(int i = 0;i < v.size();++i)
+			{
+				Util::MakeKV(v[i],key,value);
+				um.insert(make_pair(key,value));
+			}
 		}
 		//获取请求正文长度
 		int GetContentLength()
 		{
-
+			auto pos = um.find("Conten-Length");
+			if(pos!=um.end())
+				return (Util::StringToInt((pos->second)));
+			return -1;
 		}
 		//判断是否需要读取请求正文
 		bool IsNeedRecv()
 		{
-
+			if(method == "POST")
+				return true;
+			return false;
 		}
 		~HttpRequest()
 		{}
@@ -137,7 +149,7 @@ class EndPoint
 		void RecvRequestHeader(HttpRequest* rq)//接收请求报头
 		{
 			string temp;
-			string header = rq->GetRequestHeader();
+			string& header = rq->GetRequestHeader();
 			while(1)
 			{
 				RecvLine(temp);
@@ -146,7 +158,6 @@ class EndPoint
 				header+=temp;
 				temp.clear();
 			}
-			cout<<header<<endl;
 		}
 		~EndPoint()
 		{
@@ -177,7 +188,7 @@ class Entry
 				goto end;
 
 			ep->RecvRequestHeader(rq); //接收请求报头			
-			
+			rq->RequestHeaderParse();
 end:
 			delete p;
 			delete ep;

@@ -12,6 +12,11 @@
 class Util
 {
 	public:
+		//将字符串中的字符全部转换成小写字符
+		static void StringToLower(std::string& s)
+		{
+
+		}
 		//将字符串中的字符全部转换成大写字符
 		static void StringToUpper(std::string& s)
 		{
@@ -41,6 +46,12 @@ class Util
 		static void MakeKV(std::string& s,std::string& k,std::string& v)
 		{
 			auto pos = s.find(": ");
+			if(pos == std::string::npos)
+			{
+				k="";
+				v="";
+				return ;
+			}
 			k = s.substr(0,pos);
 			v = s.substr(pos+2);
 		}

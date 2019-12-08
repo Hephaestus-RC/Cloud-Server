@@ -17,6 +17,7 @@ struct DocInfo{
     string content;
     string url;
 };
+
 bool EnumFile(const std::string& input_path,std::vector<std::string>& file_list)
 {
     //使用ofstream对象，进行循环读取，将读取出的内容放在file_list中；
@@ -49,20 +50,20 @@ bool ParseTitle(const std::string& html,DocInfo& doc)
     auto begin = html.find(s);
     if(begin == std::string::npos)
     {
-        cout<<"[<title> Not Found!]"<<endl;
+        cout<<"【<title> Not Found!】"<<endl;
         return false;
     }
     auto end = html.find("</title>");
     if(end == std::string::npos)
     {
-        cout<<"[</title> Not Found!]"<<endl;
+        cout<<"【</title> Not Found!】"<<endl;
         return false;
     }
 
     begin+=s.size();
-    if(begin >= end)
+    if(begin > end)
     {
-        cerr<<"[Title Begin End Error]"<<endl;
+        cerr<<"【Title Begin End Error】"<<endl;
         return false;
     }
     
@@ -98,9 +99,9 @@ bool ParseContent(const std::string& html,DocInfo& doc)
 bool ParseUrl(const std::string& file_path,DocInfo& doc)
 {
     //因为Boost文档中的URL有一个统一的前缀()，所以只需要追加文档在本地的路径即可
-    //本地路径都是在遍历g_output_path的内容，在构造后半部分时，从本地路径中截取去非g_output_path的内容即可
-    string perfix = "https://www.boost.org/doc/libs/1_71_0/doc/html/";
-    string suffix = file_path.substr(g_output_path.size());
+    //本地路径都是在遍历g_input_path的内容，在构造后半部分时，从本地路径中截取去非g_input_path的内容即可
+    string perfix = "https://www.boost.org/doc/libs/1_71_0/doc/";
+    string suffix = file_path.substr(g_input_path.size());
     doc.url = perfix + suffix;
     return true;
 }
@@ -141,12 +142,20 @@ bool ParseFile(const std::string& file_path,DocInfo& doc)
 
     return true;
 }
-void WriteOutput(std::ofstream& ouput_file,DocInfo& doc)
+
+//C++中的iostream和ofstream等这些对象都是禁止拷贝的
+//最终结果为一个行文本文件，每一行对应一个HTML文件
+void WriteOutput(std::ofstream& output_file,const DocInfo& doc)
 {
+    //将doc中的所有元素组成一行；
+    string line = doc.title + '\3' + doc.url + '\3' + doc.content + '\n';
+    output_file.write(line.c_str(),line.size());
 }
+
+
 int main()
 {
-    //1. 枚举出输入路径中的所有html文档的路径；
+    //1. 枚举出输入路径中的所有html文档的路径,保存到一个数组中；
     std::vector<std::string> file_list;
     bool ret = EnumFile(g_input_path,file_list);
     if(!ret)
@@ -170,6 +179,7 @@ int main()
     }
     
     //2. 依次处理每个枚举出的html文档，并对该文档进行分析，分析得出html文档的标题/正文/url，同时去标
+    int i = 0;
     for(const auto& file_path : file_list)
     {
         DocInfo info;
@@ -182,8 +192,10 @@ int main()
 
         cout<<"DocInfo: Title="<<info.title<<endl;
         cout<<"           url="<<info.url<<endl;
-    //3. 将分析结果按照一行的形式写入到输出文件中
-       // WriteOutput(output_file,info);
+    
+        //3. 将分析结果按照一行的形式写入到输出文件中
+     WriteOutput(output_file,info);
+     cout<<i++<<endl;
     }
     output_file.close();
 

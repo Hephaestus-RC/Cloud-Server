@@ -1,7 +1,8 @@
 #pragma once 
 #include<string>
 #include<fstream>
-
+#include<vector>
+#include<boost/algorithm/string.hpp>
 
 class FileUtil
 {
@@ -19,6 +20,7 @@ class FileUtil
             file.close();
             return true;
         }
+
         static bool Writer(const std::string& from,std::string& to)
         {
             std::ofstream file(from.c_str());
@@ -27,5 +29,15 @@ class FileUtil
             file.write(to.c_str(),to.size());
             file.close();
             return true;
+        }
+};
+
+class StringUtil
+{
+    public:
+        static void Split(const std::string& input,std::vector<std::string>& output,const std::string& split_char)
+        {
+            //boost库中的字符串切分函数
+            boost::split(output,input,boost::is_any_of(split_char),boost::token_compress_off);
         }
 };

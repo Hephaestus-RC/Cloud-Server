@@ -1,4 +1,3 @@
-#pragma once
 //该文件包含索引模块和搜索模块
 
 #include<iostream>

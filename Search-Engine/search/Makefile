@@ -11,4 +11,4 @@ libSearcher.so:searcher.h searcher.cc
 
 .PHONY:clean
 clean:
-	rm test -f
+	rm test libSearcher.so -f

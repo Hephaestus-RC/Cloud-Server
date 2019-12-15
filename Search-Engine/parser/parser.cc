@@ -1,3 +1,9 @@
+//数据处理模块
+//对boost库中的html进行下列操作：
+//  1.去除html标签
+//  2.将所有的HTML文件的内容合并成一个行文本文件（便于索引模块处理）
+//  3.提取出每个HTML文档的标题，正文和url
+
 #include<iostream>
 #include<fstream>
 #include<string>
@@ -8,14 +14,14 @@
 
 using namespace std;
 
-const std::string g_input_path = "../data/input"; //输入文件的路径
+const std::string g_input_path = "../data/input"; //输入文件(HTML文档)的路径
 const std::string g_output_path  = "../data/tmp/raw_input"; //输出文件的路径
 
 //doc文档（待搜索的html）
 struct DocInfo{
-    string title;
-    string content;
-    string url;
+    string title; //保存标题
+    string content; //保存正文
+    string url; //保存url
 };
 
 bool EnumFile(const std::string& input_path,std::vector<std::string>& file_list)
@@ -44,7 +50,8 @@ bool EnumFile(const std::string& input_path,std::vector<std::string>& file_list)
     }
     return true;
 }
-bool ParseTitle(const std::string& html,DocInfo& doc)
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+bool ParseTitle(const std::string& html,DocInfo& doc)//解析标题
 {
     const std::string s = "<title>";
     auto begin = html.find(s);
@@ -70,7 +77,8 @@ bool ParseTitle(const std::string& html,DocInfo& doc)
     doc.title = html.substr(begin,end-begin);
     return true;
 }
-bool ParseContent(const std::string& html,DocInfo& doc) 
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+bool ParseContent(const std::string& html,DocInfo& doc)//解析正文 
 {
     //正文中的 < 和 > 会被转义成 &lt 和 &gt
     bool is_content = true;
@@ -96,7 +104,8 @@ bool ParseContent(const std::string& html,DocInfo& doc)
     }
     return true;
 }
-bool ParseUrl(const std::string& file_path,DocInfo& doc)
+////////////////////////////////////////////////////////////////////////////////////////////////////// 
+bool ParseUrl(const std::string& file_path,DocInfo& doc)//解析url
 {
     //因为Boost文档中的URL有一个统一的前缀()，所以只需要追加文档在本地的路径即可
     //本地路径都是在遍历g_input_path的内容，在构造后半部分时，从本地路径中截取去非g_input_path的内容即可
@@ -106,7 +115,8 @@ bool ParseUrl(const std::string& file_path,DocInfo& doc)
     return true;
 }
 
-bool ParseFile(const std::string& file_path,DocInfo& doc)
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+bool ParseFile(const std::string& file_path,DocInfo& doc)//分析文件
 {
     //1. 打开文件，读取文件内容 
     //2. 解析标题 ParseTitle() ; 可以使用正则表达式
@@ -143,10 +153,11 @@ bool ParseFile(const std::string& file_path,DocInfo& doc)
     return true;
 }
 
-//C++中的iostream和ofstream等这些对象都是禁止拷贝的
-//最终结果为一个行文本文件，每一行对应一个HTML文件
-void WriteOutput(std::ofstream& output_file,const DocInfo& doc)
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+void WriteOutput(std::ofstream& output_file,const DocInfo& doc) //将结果构建成一个行文本文件
 {
+    //C++中的iostream和ofstream等这些对象都是禁止拷贝的
+    //最终结果为一个行文本文件，每一行对应一个HTML文件
     //将doc中的所有元素组成一行；
     string line = doc.title + '\3' + doc.url + '\3' + doc.content + '\n';
     output_file.write(line.c_str(),line.size());
@@ -156,7 +167,7 @@ void WriteOutput(std::ofstream& output_file,const DocInfo& doc)
 int main()
 {
     //1. 枚举出输入路径中的所有html文档的路径,保存到一个数组中；
-    std::vector<std::string> file_list;
+    std::vector<std::string> file_list; //保存每个HTML文件的路径； 
     bool ret = EnumFile(g_input_path,file_list);
     if(!ret)
     {
@@ -193,7 +204,7 @@ int main()
         cout<<"DocInfo: Title="<<info.title<<endl;
         cout<<"           url="<<info.url<<endl;
     
-        //3. 将分析结果按照一行的形式写入到输出文件中
+     //3. 将分析结果按照一行的形式写入到输出文件中
      WriteOutput(output_file,info);
      cout<<i++<<endl;
     }
@@ -209,4 +220,4 @@ int main()
 
 
 
-
+//00:36:00

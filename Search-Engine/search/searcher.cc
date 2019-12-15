@@ -44,7 +44,7 @@ namespace searcher
     bool Index::Build(const string& input_path)
     {
         //1. 按行读取文件内容(一行就是一个html文件) 
-        //2. 构造Doinfo结构体，将其更新到正排索引中
+        //2. 构造Docinfo结构体，将其更新到正排索引中
         //3. 更新倒排索引
         cout<<"Start Build"<<endl;
         std::ifstream file(input_path.c_str());
@@ -54,11 +54,27 @@ namespace searcher
             return false;
         }
         string line;
+        char bar[100] = {'\0'};
+        int  i = 1;
         while(getline(file,line))
         {
-            const DocInfo* doc = BuildForward(line);
-            BuildInverted(*doc);
+            const DocInfo* doc = BuildForward(line);//正排
+            BuildInverted(*doc);  //倒排
+            //进度条
+            if(i%66==0)
+            {
+                printf("[%-3d%%][%-100s] \r",i/66,bar);
+                fflush(stdout);
+                bar[(i/66)-1] = '=';
+                if((i/66)==100)
+                    bar[i/66] = '=';
+                else 
+                    bar[i/66] = '>';
+            }
+            i++;
+             
         }
+        cout<<endl;
         cout<<"Build End"<<endl;
         file.close();
         return true;

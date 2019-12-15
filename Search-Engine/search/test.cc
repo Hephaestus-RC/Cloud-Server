@@ -33,6 +33,8 @@ int main()
 }
 #endif
 
+
+//验证搜索模块
 int main()
 {
     searcher::Searcher searcher;
@@ -42,7 +44,7 @@ int main()
     string result ;
     searcher.Search(query,result);
 
-    cout<<"Result: "<<result<<endl;
+ //   cout<<"Result: "<<result<<endl;
     return 0;
 
 }

@@ -147,7 +147,10 @@ namespace searcher
     
     bool Searcher::Init(const string& input_path)
     {
-        return _index->Build(input_path);
+        cout<<"开始构建索引"<<endl;
+        bool ret =  _index->Build(input_path);
+        cout<<"索引构建完成！"<<endl;
+        return ret;
     }
     bool Searcher::Search(const string& query,string& json_result)
     {
@@ -158,6 +161,7 @@ namespace searcher
         
         vector<string> tokens; //保存查询词的分词结果
         _index->CutWord(query,tokens);
+        cout<<"Search::分词完成！"<<endl;
 
         vector<Weight> all_token_result;
         for(auto word : tokens)
@@ -169,12 +173,13 @@ namespace searcher
             //去重，同时增加权重
             all_token_result.insert(all_token_result.end(),inverted_list->begin(),inverted_list->end());
         }
-
+        cout<<"Search::触发完成！"<<endl;
         
         sort(all_token_result.begin()
             ,all_token_result.end()
             ,[](const Weight& w1,const Weight& w2)
                 {return w1.weight > w2.weight;}); //sort的第三个参数(仿函数/函数指针/lambda表达式)
+        cout<<"Search::排序完成！"<<endl;
 
         Json::Value results;
         // 借助jsoncpp库完成对返回结果的序列化
@@ -195,14 +200,15 @@ namespace searcher
             if(doc == nullptr)
                 continue;
             Json::Value result;
-            result["title"] = doc->title;
-            result["url"] = doc->url;
-            result["Desc"] = GetDesc(doc->content,weight.key);
+            result["title"] = (doc->title);
+            result["url"] = (doc->url);
+            result["Desc"] = (GetDesc(doc->content,weight.key));
             results.append(result);
         }
+        cout<<"Search::结果构建完成！"<<endl;
         Json::FastWriter w;
         json_result = w.write(results);
-
+        cout<<"一次检索完成！"<<endl;
         return true;
     }
     string Searcher::GetDesc(const string& content,const string& key)

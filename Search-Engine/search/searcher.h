@@ -19,14 +19,14 @@ namespace searcher
         string content;
     };
 
-    struct Weight
+    struct Weight //倒排项
     {
         uint64_t doc_id;
         int weight; //权重（为排序做准备，权重值用词频计算出）
         string key; 
     };
 
-    typedef vector<Weight> InvertedList;
+    typedef vector<Weight> InvertedList; //倒排列表,用来记载出现该词的所有文档以及权重；
     
     //索引模块
     class Index
